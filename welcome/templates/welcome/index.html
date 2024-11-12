@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Posts</title>
+    <style>
+        /* style.css */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header nav {
+            margin-top: 0.5rem;
+        }
+
+        header nav a {
+            color: #fff;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        .posts {
+            list-style-type: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .post {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .post h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .post p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .post small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #888;
+        }
+
+        .post img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+        }
+
+        .comment-section {
+            display: none;
+            margin-top: 1rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1rem;
+        }
+
+        .comment-section h3 {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .comment-section form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1rem;
+        }
+
+        .comment-section textarea {
+            resize: none;
+            height: 60px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .comment-section button {
+            align-self: flex-start;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            color: red;
+            margin-top: 10px;
+            padding: 0.5rem;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+
+        .edit-btn {
+            color: #333;
+            margin-top: 10px;
+            padding: 0.5rem;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .edit-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Blog Posts</h1>
+        <nav>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout_view' %}">Logout</a>
+                <a href="{% url 'add_blog_post' %}">Add Blog Post</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <ul class="posts">
+        {% for post in posts %}
+            <li class="post">
+                <h2>{{ post.title }}</h2>
+                
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                {% endif %}
+                
+                <p>{{ post.content }}</p>
+                <small>Published on: {{ post.publication_date }}</small>
+                <small>by {{ post.author.username }}</small>
+
+                <!-- Comments button -->
+                <button onclick="toggleComments({{ post.id }})">
+                    💬 Comments
+                </button>
+
+                <!-- Comments section -->
+                <div id="comments-{{ post.id }}" class="comment-section">
+                    <h3>Comments</h3>
+                    <ul>
+                        {% for comment in post.comments.all %}
+                            <li>
+                                <strong>{{ comment.author.username }}</strong>: {{ comment.content }}
+                                <small> - {{ comment.publication_date }}</small>
+                            </li>
+                        {% empty %}
+                            <li>No comments yet.</li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'add_comment' post.id %}" method="POST">
+                            {% csrf_token %}
+                            <textarea name="content" placeholder="Write a comment..." required></textarea>
+                            <button type="submit">Add Comment</button>
+                        </form>
+                    {% else %}
+                        <p><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Delete post button, visible to the post author or superuser -->
+                {% if user == post.author or user.is_superuser %}
+                    <form action="{% url 'delete_blog_post' post.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">Delete Post</button>
+                    </form>
+                {% endif %}
+
+                <!-- Edit post button, visible to the post author or superuser -->
+                {% if user == post.author or user.is_superuser %}
+                    <a href="{% url 'edit_blog_post' post.id %}">
+                        <button class="edit-btn">Edit Post</button>
+                    </a>
+                {% endif %}
+            </li>
+        {% empty %}
+            <p>No blog posts available.</p>
+        {% endfor %}
+    </ul>
+
+    <script>
+        function toggleComments(postId) {
+            const commentSection = document.getElementById(`comments-${postId}`);
+            if (commentSection.style.display === "none" || !commentSection.style.display) {
+                commentSection.style.display = "block";
+            } else {
+                commentSection.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

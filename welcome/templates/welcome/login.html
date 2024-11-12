@@ -1,0 +1,12 @@
+<!-- login.html -->
+<h2>Login Page</h2>
+<form method="POST" action="{% url 'login' %}">
+    {% csrf_token %}
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username">
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password">
+    <br>
+    <button type="submit">Login</button>
+</form>
