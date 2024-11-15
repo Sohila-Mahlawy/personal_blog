@@ -66,7 +66,8 @@ def add_blog_post(request):
 
 @login_required
 def add_comment(request, post_id):
-    post = get_object_or_404(BlogPost, id=post_id)  # get_object_or_404 will work now
+    post = get_object_or_404(BlogPost, id=post_id)
+
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -74,7 +75,16 @@ def add_comment(request, post_id):
             comment.blog_post = post
             comment.author = request.user
             comment.save()
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Check if it's an AJAX request
+                return JsonResponse({
+                    'author': comment.author.username,
+                    'content': comment.content,
+                    'publication_date': comment.publication_date.strftime('%Y-%m-%d %H:%M:%S'),
+                })
+
     return redirect('index')
+    
 
 
 @login_required
@@ -113,13 +123,16 @@ def edit_blog_post(request, post_id):
 @login_required
 def like_post(request, post_id):
     post = get_object_or_404(BlogPost, id=post_id)
-    
+    liked = False
+
     if request.user in post.likes.all():
         # If user already liked the post, unlike it
         post.likes.remove(request.user)
     else:
         # Otherwise, like the post
         post.likes.add(request.user)
-    
-    # Redirect back to the homepage or post list
+        liked = True
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Check if it's an AJAX request
+        return JsonResponse({'liked': liked, 'like_count': post.likes.count()})
     return redirect('index')

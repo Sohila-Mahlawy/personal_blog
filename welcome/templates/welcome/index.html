@@ -9,6 +9,8 @@
         const csrftoken = '{{ csrf_token }}';
     </script>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         /* style.css */
         body {
@@ -195,40 +197,55 @@
                     </ul>
 
                     {% if user.is_authenticated %}
-                        <form action="{% url 'add_comment' post.id %}" method="POST">
-                            {% csrf_token %}
-                            <textarea name="content" placeholder="Write a comment..." required></textarea>
-                            <button type="submit">Add Comment</button>
-                        </form>
+                    <form action="{% url 'add_comment' post.id %}" method="POST" class="comment-form" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <textarea name="content" placeholder="Write a comment..." required></textarea>
+                        <button type="submit">Add Comment</button>
+                    </form>
+                    
                     {% else %}
                         <p><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
                     {% endif %}
                 </div>
 
-<!-- like button -->
-                <form action="{% url 'like_post' post.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="like-button">
-                        {% if user in post.likes.all %}
-                            Unlike
-                        {% else %}
-                            Like
-                        {% endif %}
-                    </button>
-                </form>
-        
-                <p class="like-count">{{ post.likes.count }} likes</p>
 
-                <!-- Edit post button, visible to the post author or superuser -->
-                {% if user == post.author or user.is_superuser %}
-                    <a href="{% url 'edit_blog_post' post.id %}">
-                        <button class="edit-btn">Edit Post</button>
-                    </a>
-                {% endif %}
-            </li>
-        {% empty %}
-            <p>No blog posts available.</p>
-        {% endfor %}
+                
+<!-- like button -->
+<form action="{% url 'like_post' post.id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit" class="like-button">
+        {% if user in post.likes.all %}
+            Unlike
+        {% else %}
+            Like
+        {% endif %}
+    </button>
+</form>
+
+<p class="like-count">{{ post.likes.count }} likes</p>
+
+
+
+ <!-- Edit post button, visible to the post author or superuser -->
+ {% if user == post.author or user.is_superuser %}
+ <a href="{% url 'edit_blog_post' post.id %}">
+     <button class="edit-btn">Edit Post</button>
+ </a>
+ {% endif %}
+
+<br>
+        <!-- Delete post button, visible to the post author or superuser -->
+        {% if user == post.author or user.is_superuser %}
+        <a href="{% url 'delete_blog_post' post.id %}">
+            <button class="delete-btn">Delete Post</button>
+        </a>
+    {% endif %}
+</li>
+{% empty %}
+<p>No blog posts available.</p>
+{% endfor %}
+
+
     </ul>
 
 
@@ -245,5 +262,71 @@
 
 
 </script>
+
+<script>
+    $(document).on('submit', '.comment-form', function (e) {
+        e.preventDefault(); // Prevent the default form submission
+    
+        const form = $(this);
+        const postId = form.data('post-id');
+        const actionUrl = form.attr('action'); // Get the form action URL
+        const content = form.find('textarea[name="content"]').val(); // Get the comment content
+    
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: {
+                content: content,
+                csrfmiddlewaretoken: csrftoken // Pass CSRF token
+            },
+            success: function (response) {
+                // Clear the textarea
+                form.find('textarea[name="content"]').val('');
+    
+                // Append the new comment to the comment list
+                const commentList = $(`#comments-${postId} ul`);
+                commentList.append(
+                    `<li>
+                        <strong>${response.author}</strong>: ${response.content}
+                        <small> - ${response.publication_date}</small>
+                    </li>`
+                );
+            },
+            error: function (error) {
+                console.error('Error adding comment:', error);
+            }
+        });
+    });
+    </script>
+    
+
+    <script>
+        $(document).on('click', '.like-button', function (e) {
+            e.preventDefault(); // Prevent the default button action
+        
+            const button = $(this);
+            const postId = button.data('post-id');
+            const actionUrl = button.closest('form').attr('action'); // Get the form action URL
+        
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: {
+                    csrfmiddlewaretoken: csrftoken // Pass CSRF token
+                },
+                success: function (response) {
+                    // Update the button text based on the like status
+                    button.text(response.liked ? 'Unlike' : 'Like');
+        
+                    // Update the like count
+                    button.closest('.post').find('.like-count').text(`${response.like_count} likes`);
+                },
+                error: function (error) {
+                    console.error('Error toggling like:', error);
+                }
+            });
+        });
+        </script>
+
 </body>
 </html>
