@@ -10,7 +10,11 @@ from django.http import JsonResponse
 # View to display all posts, most recent first
 def welcome(request):
     posts = BlogPost.objects.all().order_by('-publication_date')  # Fetch all posts, most recent first
+    for post in posts:
+        # Use `like_set` to filter by `user` in the related `Like` model
+        post.is_liked_by_user = post.like_set.filter(user=request.user).exists() if request.user.is_authenticated else False 
     return render(request, 'welcome/index.html', {'posts': posts})
+
 
 # Login view
 def login(request):
@@ -104,3 +108,18 @@ def edit_blog_post(request, post_id):
     return render(request, 'welcome/edit_blog_post.html', {'form': form, 'post': post})
 
 
+# new
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+    
+    if request.user in post.likes.all():
+        # If user already liked the post, unlike it
+        post.likes.remove(request.user)
+    else:
+        # Otherwise, like the post
+        post.likes.add(request.user)
+    
+    # Redirect back to the homepage or post list
+    return redirect('index')

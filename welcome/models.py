@@ -8,6 +8,12 @@ class BlogPost(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
 
+    # Add the related_name "likes" for easy access to the Like model
+    likes = models.ManyToManyField(User, through='Like', related_name='liked_posts', blank=True)
+    
+    def __str__(self):
+        return self.title
+
     def __str__(self):
         return self.title
 

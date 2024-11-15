@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Posts</title>
+
+    <script>
+        const csrftoken = '{{ csrf_token }}';
+    </script>
+
     <style>
         /* style.css */
         body {
@@ -200,13 +205,19 @@
                     {% endif %}
                 </div>
 
-                <!-- Delete post button, visible to the post author or superuser -->
-                {% if user == post.author or user.is_superuser %}
-                    <form action="{% url 'delete_blog_post' post.id %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-btn">Delete Post</button>
-                    </form>
-                {% endif %}
+<!-- like button -->
+                <form action="{% url 'like_post' post.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="like-button">
+                        {% if user in post.likes.all %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+                </form>
+        
+                <p class="like-count">{{ post.likes.count }} likes</p>
 
                 <!-- Edit post button, visible to the post author or superuser -->
                 {% if user == post.author or user.is_superuser %}
@@ -220,15 +231,19 @@
         {% endfor %}
     </ul>
 
-    <script>
-        function toggleComments(postId) {
-            const commentSection = document.getElementById(`comments-${postId}`);
-            if (commentSection.style.display === "none" || !commentSection.style.display) {
-                commentSection.style.display = "block";
-            } else {
-                commentSection.style.display = "none";
-            }
+
+
+<script>
+    function toggleComments(postId) {
+        const commentSection = document.getElementById(`comments-${postId}`);
+        if (commentSection.style.display === "none" || !commentSection.style.display) {
+            commentSection.style.display = "block";
+        } else {
+            commentSection.style.display = "none";
         }
-    </script>
+    }
+
+
+</script>
 </body>
 </html>
