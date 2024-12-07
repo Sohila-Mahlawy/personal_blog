@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% load static %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&display=swap" rel="stylesheet">
+
+    <title>Stand Blog - Post Details</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+
+    <style>
+      .view-all-comments-btn {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .view-all-comments-btn:hover {
+        background-color: #0056b3;
+      }
+
+      .navbar-brand {
+        text-align: center;
+        display: inline-block;
+      }
+      
+      .navbar-logo {
+        max-width: 100px; /* Adjust image size */
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="{% static 'flex-slider.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'templatemo-stand-blog.css' %}">
+    <link rel="stylesheet" href="{% static 'owl.css' %}">
+  </head>
+
+  <body>
+    <header class="">
+      <nav class="navbar navbar-expand-lg">
+        <div class="container text-center">
+          <a class="navbar-brand" href="/">
+            <img src="{% static 'assets/images/netfull.png' %}" alt="" class="navbar-logo">
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Home
+                  <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/about">About Us</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/blog">Blog Entries</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/contact">Contact Us</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="heading-page header-text"></div>
+
+    <section class="blog-posts grid-system">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="all-blog-posts">
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="blog-post">
+                    <div class="blog-thumb">
+                      {% if post.image %}
+                      <img src="{{post.image.url}}" alt="">
+                      {% endif %}
+                    </div>
+                    <div class="down-content">
+                      <span>{{post.title}}</span>
+                      <a href="/post/{{post.id}}"><h4>{{post.content}}</h4></a>
+                      <ul class="post-info">
+                        <li><a href="#">{{post.author}}</a></li>
+                        <li><a href="#">{{post.publication_date}}</a></li>
+                        <li><a href="#">{{comments_count}} Comments</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sidebar-item comments">
+                  <div class="sidebar-heading">
+                    <h2 id="comments-count">{{ comments_count }} Comments</h2>
+                  </div>
+                  <div class="content">
+                    <ul id="comments-list" style="list-style: none; padding: 0;">
+                      {% for comment in visible_comments %}
+                      <li style="margin-bottom: 15px; display: flex; align-items: center;">
+                        <div class="author-thumb" style="margin-right: 0; flex-shrink: 0;">
+                          <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" 
+                               alt="Unknown User" style="width: 50px; height: 50px; border-radius: 50%;">
+                        </div>
+                        <div class="right-content" style="margin-left: 8px;">
+                          <h4 style="margin: 0; font-size: 16px;">{{ comment.user }}
+                            <span style="font-size: 12px; color: #888; margin-left: 5px;">{{ comment.created_at }}</span>
+                          </h4>
+                          <p style="margin: 5px 0; font-size: 14px;">{{ comment.content }}</p>
+                        </div>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                
+                    {% if remaining_comments %}
+                    <a href="javascript:void(0);" id="view-all-comments" style="font-size: 14px; color: #007bff; text-decoration: none;">View All Comments</a>
+                    <ul id="all-comments-list" style="list-style: none; padding: 0; display: none;">
+                      {% for comment in remaining_comments %}
+                      <li style="margin-bottom: 15px; display: flex; align-items: center;">
+                        <div class="author-thumb" style="margin-right: 0; flex-shrink: 0;">
+                          <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" 
+                               alt="Unknown User" style="width: 50px; height: 50px; border-radius: 50%;">
+                        </div>
+                        <div class="right-content" style="margin-left: 8px;">
+                          <h4 style="margin: 0; font-size: 16px;">{{ comment.user }}
+                            <span style="font-size: 12px; color: #888; margin-left: 5px;">{{ comment.created_at }}</span>
+                          </h4>
+                          <p style="margin: 5px 0; font-size: 14px;">{{ comment.content }}</p>
+                        </div>
+                      </li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                
+                
+
+
+                <div class="col-lg-12">
+                  <div class="sidebar-item submit-comment">
+                    <div class="sidebar-heading">
+                      <h2>Your comment</h2>
+                    </div>
+                    <div class="content">
+                      <form id="comment-form" action="{% url 'add_comment' post.id %}" method="post" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <fieldset>
+                              <textarea name="content" rows="6" id="content" placeholder="Type your comment" required=""></textarea>
+                            </fieldset>
+                          </div>
+                          <div class="col-lg-12">
+                            <fieldset>
+                              <button type="button" id="submit-comment" class="main-button">Comment</button>
+                            </fieldset>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="sidebar">
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="sidebar-item search">
+                    <form id="search_form" name="gs" method="GET" action="#">
+                      <input type="text" name="q" class="searchText" placeholder="type to search..." autocomplete="on">
+                    </form>
+                  </div>
+                </div>
+
+                <div class="col-lg-12">
+                  <div class="sidebar-item recent-posts">
+                    <div class="sidebar-heading">
+                      <h2>Recent Posts</h2>
+                    </div>
+                    <div class="content">
+                      <ul>
+                        {% for post in recent_posts %}
+                        <li>
+                          <a href="post-details.html">
+                            <h5>{{ post.title }}</h5>
+                            <span>{{ post.publication_date }}</span>
+                          </a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <ul class="social-icons">
+              <li><a href="https://www.facebook.com/profile.php?id=61561751296406">Facebook</a></li>
+              <li><a href="https://www.instagram.com/netfull1/">Instagram</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-12">
+            <div class="copyright-text">
+              <p>Made By Net Full</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Additional Scripts -->
+    <script src="{% static 'js/costom.js' %}"></script>
+    <script src="{% static 'js/sowl.js' %}"></script>
+    <script src="{% static 'js/slick.js' %}"></script>
+    <script src="{% static 'js/isotop.js' %}"></script>
+    <script src="{% static 'js/accordions.js' %}"></script>
+
+    <script>
+      document.getElementById('submit-comment').addEventListener('click', function () {
+        const form = document.getElementById('comment-form');
+        const url = form.getAttribute('action');
+        const formData = new FormData(form);
+        const commentText = document.getElementById('content').value;
+    
+        if (commentText.trim()) {
+          fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.username) {
+              const commentList = document.getElementById('comments-list');
+              const newComment = document.createElement('li');
+              newComment.style = 'margin-bottom: 15px; display: flex; align-items: center;';
+              newComment.innerHTML = `
+                <div class="author-thumb" style="margin-right: 8px; flex-shrink: 0;">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" 
+                       alt="Unknown User" style="width: 50px; height: 50px; border-radius: 50%;">
+                </div>
+                <div class="right-content">
+                  <h4 style="margin: 0; font-size: 16px;">${data.username}
+                    <span style="font-size: 12px; color: #888; margin-left: 5px;">${data.created_at}</span>
+                  </h4>
+                  <p style="margin: 5px 0; font-size: 14px;">${data.content}</p>
+                </div>
+              `;
+              commentList.insertBefore(newComment, commentList.firstChild);
+              form.reset();
+            }
+          })
+          .catch(error => console.error('Error:', error));
+        }
+      });
+    
+      document.getElementById('view-all-comments').addEventListener('click', function () {
+        const allCommentsList = document.getElementById('all-comments-list');
+        if (allCommentsList.style.display === 'none') {
+          allCommentsList.style.display = 'block';
+          this.textContent = 'Hide All Comments';
+        } else {
+          allCommentsList.style.display = 'none';
+          this.textContent = 'View All Comments';
+        }
+      });
+    </script>
+    
+<script>
+  document.getElementById('view-all-comments').addEventListener('click', function () {
+    document.getElementById('all-comments-list').style.display = 'block';
+    this.style.display = 'none';
+  });
+</script>
+  </body>
+</html>
